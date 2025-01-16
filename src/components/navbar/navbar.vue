@@ -35,7 +35,7 @@ export default defineComponent({
         return {
             fillG: 'rgb(255,157,0)',
             fillESTOR: 'rgb(0,0,0)',
-            themeChecked: 'true',
+            themeChecked: true,
         }
     },
     computed: {
@@ -45,7 +45,7 @@ export default defineComponent({
     },
     methods: {
         async themeChange() {
-            const isChecked = (this.$refs.themecontrolle).checked;
+            const isChecked = (this.$refs.themecontroller).checked;
             localStorage.setItem('themecontroller', isChecked.toString());
             this.change(isChecked.toString());
         },
@@ -59,7 +59,6 @@ export default defineComponent({
                 this.fillESTOR = 'rgb(159, 185, 197)';
             }
 
-            console.log(isChecked);
 
             this.$emit('theme-updated', { fillG: this.fillG, fillESTOR: this.fillESTOR });
         }
