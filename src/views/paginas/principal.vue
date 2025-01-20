@@ -52,8 +52,9 @@
         </thead>
         <tbody>
           <tr v-for="(pedido, index) in pedidosFiltrados" :key="pedido.id" class="odd:bg-base-100 even:bg-base-200">
+            
             <th>{{ index + 1 }}</th>
-            <td>{{ pedido.numero_pedido }}</td>
+            <td><router-link :to="'/pedido/' + pedido.numero_pedido">{{ pedido.numero_pedido }}</router-link></td>
             <td>{{ pedido.cnpj }}</td>
             <td>{{ pedido.cliente_numero }}</td>
             <td>{{ pedido.cliente }}</td>
