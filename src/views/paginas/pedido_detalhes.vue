@@ -10,7 +10,7 @@
                     Lista detalhada dos produtos incluídos no pedido, com seus valores e quantidades.
                 </p>
                 <div class="overflow-x-auto">
-                    <table class="table w-full">
+                    <table class="table w-full whitespace-nowrap overflow-scroll">
                         <thead>
                             <tr>
                                 <th>#</th>
