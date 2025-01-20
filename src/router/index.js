@@ -19,6 +19,11 @@ const router = createRouter({
           name: 'Principal',
           component: () => import('../views/paginas/principal.vue')
         },
+        {
+          path: '/pedido/:id',
+          name: 'PedidoDetalhes',
+          component: () => import('../views/paginas/pedido_detalhes.vue')
+        },
       ],
     },
   ],
