@@ -1,5 +1,11 @@
 <template>
   <div>
+    <div class="overflow-x-auto card bg-base-100 w-full mb-3 shadow p-3">
+      <button class="btn btn-primary btn-sm w-full md:w-96" @click="baixarTodos">
+        <i class="bx bx-download"></i>
+        Baixar todos
+      </button>
+    </div>
     <!-- Tabela -->
     <div class="overflow-x-auto card bg-base-100 w-full mb-3 shadow">
       <table class="table whitespace-nowrap">
@@ -52,7 +58,7 @@
         </thead>
         <tbody>
           <tr v-for="(pedido, index) in pedidosFiltrados" :key="pedido.id" class="odd:bg-base-100 even:bg-base-200">
-            
+
             <th>{{ index + 1 }}</th>
             <td><router-link :to="'/pedido/' + pedido.numero_pedido">{{ pedido.numero_pedido }}</router-link></td>
             <td>{{ pedido.cnpj }}</td>
@@ -62,12 +68,14 @@
             <td class="text-center">{{ pedido.quantidade_itens }}</td>
             <td class="text-center">{{ pedido.pedidos_distintos - 1 }}</td>
             <td class="text-center">
-              <button class="btn btn-warning btn-xs mx-1" @click="abrirModalComplemento(pedido)" title="Adicionar pedido complementar">
-                <i class='bx bx-plus' ></i>
+              <button class="btn btn-warning btn-xs mx-1" @click="abrirModalComplemento(pedido)"
+                title="Adicionar pedido complementar">
+                <i class='bx bx-plus'></i>
               </button>
 
-              <button class="btn btn-secondary btn-xs mx-1" @click="abrirModalComplemento(pedido)" title="Remover pedido complementar">
-                <i class='bx bx-trash' ></i>
+              <button class="btn btn-secondary btn-xs mx-1" @click="abrirModalComplemento(pedido)"
+                title="Remover pedido complementar">
+                <i class='bx bx-trash'></i>
               </button>
             </td>
           </tr>
@@ -97,6 +105,7 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 import moment from "moment";
+import { saveAs } from "file-saver";
 
 export default {
   data() {
@@ -115,6 +124,16 @@ export default {
       codigoComplemento: "",
     };
   },
+  watch : {
+    'filtro.dataInicial'(value) {
+      localStorage.setItem('dataInicial', value);
+      this.totais(this.filtro.dataInicial, this.filtro.dataFinal, this.filtro.busca);
+    },
+    'filtro.dataFinal'(value) {
+      localStorage.setItem('dataFinal', value);
+      this.totais(this.filtro.dataInicial, this.filtro.dataFinal, this.filtro.busca);
+    }
+  },
   methods: {
     async totais(dataInicial = null, dataFinal = null, busca = null) {
       try {
@@ -125,9 +144,9 @@ export default {
 
         const response = await axios.get(
           `http://localhost:8083/api/v1/pedidos`,
-          { 
+          {
             headers: authorization,
-            params: { data_inicial: dataInicial, data_final: dataFinal, busca: busca} 
+            params: { data_inicial: dataInicial, data_final: dataFinal, busca: busca }
           }
         );
 
@@ -246,12 +265,28 @@ export default {
           confirmButtonText: "Ok",
         });
       }
-    }
+    },
+    baixarTodos() {
+      this.pedidos.forEach((pedido) => {
+        const fileName = `${pedido.numero_pedido} ${pedido.cliente}.txt`;
+        const fileContent = pedido.itens
+          .map((item) => {
+            const codigo = item.codigo.toString().padStart(6, "0");
+            const quantidade = item.quantidade.toString().padStart(8, "0");
+            const precoLiquido = item.preco_liquido.toFixed(2).replace(".", "").padStart(6, "0");
+            return `${codigo} ${quantidade} ${precoLiquido}`;
+          })
+          .join("\n");
+
+        const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+        saveAs(blob, fileName);
+      });
+    },
 
   },
   mounted() {
-    this.filtro.dataInicial = moment(new Date()).format("YYYY-MM-DD");
-    this.filtro.dataFinal = moment(new Date()).format("YYYY-MM-DD");
+    this.filtro.dataInicial = localStorage.getItem("dataInicial") ?? moment(new Date()).format("YYYY-MM-DD");
+    this.filtro.dataFinal = localStorage.getItem("dataFinal") ?? moment(new Date()).format("YYYY-MM-DD");
     this.filtro.busca = '';
     this.totais(this.filtro.dataInicial, this.filtro.dataFinal, this.filtro.busca);
   },
