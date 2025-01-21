@@ -5,6 +5,6 @@ export default {
     themes: [ "light", "sunset", "synthwave" ],
   },
   plugins: [
-    require('daisyui'),
+    require('daisyui'),require('tailwindcss-primeui')
   ],
 }
