@@ -29,8 +29,8 @@
                                 <td>{{ item.produto }}</td>
                                 <td>{{ item.quantidade }}</td>
                                 <td>{{ formatMoeda(item.preco_tabela) }}</td>
-                                <td>{{ item.desconto || 'N/A' }}</td>
-                                <td>{{ formatMoeda(item.preco_liquido) }}</td>
+                                <td>{{ item.desconto }}</td>
+                                <td :class="item.preco_tabela / item.preco != 0 && item.desconto == '' ? 'bg-error text-white' : ''">{{ formatMoeda(item.preco_liquido) }}</td>
                                 <td>{{ formatMoeda(item.subtotal) }}</td>
                                 <td>
                                     <button @click="editarItem(item)" class="btn btn-sm btn-primary">Editar</button>
