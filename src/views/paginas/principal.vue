@@ -273,7 +273,7 @@ export default {
           .map((item) => {
             const codigo = item.codigo.toString().padStart(6, "0");
             const quantidade = item.quantidade.toString().padStart(8, "0");
-            const precoLiquido = item.preco_liquido.toFixed(2).replace(".", "").padStart(6, "0");
+            const precoLiquido = item.preco_liquido.toFixed(2).replace(".", ",").padStart(7, "0");
             return `${codigo} ${quantidade} ${precoLiquido}`;
           })
           .join("\n");
