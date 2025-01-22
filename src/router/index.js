@@ -24,6 +24,23 @@ const router = createRouter({
           name: 'PedidoDetalhes',
           component: () => import('../views/paginas/pedido_detalhes.vue')
         },
+        {
+          path: '/usuarios',
+          name: 'Usuarios',
+          component: () => import('../views/paginas/lista_usuarios.vue')
+        },
+        {
+          path: "/cadastro/usuarios",
+          name: "CadastroUsuario",
+          component: () =>
+            import("../views/paginas/cadastro_usuario.vue"),
+        },
+        {
+          path: "/cadastro/usuarios/:id",
+          name: "CadastroUsuarioId",
+          component: () =>
+            import("../views/paginas/cadastro_usuario.vue"),
+        },
       ],
     },
   ],
