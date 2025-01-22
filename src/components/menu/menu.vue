@@ -67,6 +67,7 @@ export default {
         return {
             menuItems: [
                 { label: "Início", path: "/principal", icon: "bx bx-home" },
+                { label: "Usuarios", path: "/usuarios", icon: "bx bx-user"},
             ]
         };
     },
