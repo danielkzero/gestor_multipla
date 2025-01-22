@@ -10,7 +10,7 @@
                     <label for="avatar" class="block mb-2">Avatar</label>
                     <div class="m-auto" style="max-height: 100px; max-width: 100px;">
                         <!-- Ícone grande para abrir a caixa de diálogo de upload -->
-                        <i class="bx bxs-user-circle text-5xl cursor-pointer" v-if="!formData.avatar"
+                        <i class="bx bxs-user-circle text-8xl cursor-pointer w-24 h-24 rounded-full shadow" v-if="!formData.avatar"
                             @click="triggerAvatarUpload"></i>
                         <!-- Mostrar a prévia do avatar se a imagem for selecionada -->
                         <div v-if="formData.avatar">
@@ -79,7 +79,7 @@
 <script>
 import AlertGestor from '@/components/AlertGestor.vue';
 import EditorGestor from '@/components/EditorGestor.vue';
-import axios from 'axios';
+import axios from '@/axios';
 
 export default {
     components: {
@@ -137,7 +137,7 @@ export default {
         },
         loadUserData(id) {
             // Busca os dados do usuário para edição
-            axios.get(`http://localhost:8083/api/v1/usuario/${id}`)
+            axios.get(`/api/v1/usuario/${id}`)
                 .then(response => {
                     const userData = response.data[0];
                     this.formData = {
@@ -165,7 +165,7 @@ export default {
                     .then(response => {
                         console.log(response);
                         alert('Usuário atualizado com sucesso!');
-                        this.$router.push('/configuracoes');
+                        this.$router.push('/usuarios');
                     })
                     .catch(error => {
                         console.error('Erro ao atualizar o usuário:', error);
@@ -176,7 +176,7 @@ export default {
                     .then(response => {
                         console.log(response);
                         alert('Usuário cadastrado com sucesso!');
-                        this.$router.push('/configuracoes');
+                        this.$router.push('/usuarios');
                     })
                     .catch(error => {
                         console.error('Erro ao cadastrar o usuário:', error);
