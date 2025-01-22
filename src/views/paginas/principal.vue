@@ -57,23 +57,24 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(pedido, index) in pedidosFiltrados" :key="pedido.id" class="odd:bg-base-100 even:bg-base-200">
-
+          <tr v-for="(pedido, index) in pedidosFiltrados" :key="pedido.id"
+            class="hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200"
+            @click="handleRowClick($event, '/pedido/' + pedido.numero_pedido)">
             <th>{{ index + 1 }}</th>
-            <td><router-link :to="'/pedido/' + pedido.numero_pedido">{{ pedido.numero_pedido }}</router-link></td>
+            <td>{{ pedido.numero_pedido }}</td>
             <td>{{ pedido.cnpj }}</td>
             <td>{{ pedido.cliente_numero }}</td>
             <td>{{ pedido.cliente }}</td>
             <td class="text-right">{{ formatMoeda(pedido.valor_total.toFixed(2)) }}</td>
             <td class="text-center">{{ pedido.quantidade_itens }}</td>
             <td class="text-center">{{ pedido.pedidos_distintos - 1 }}</td>
-            <td class="text-center">
+            <td class="text-center no-active-click">
               <button class="btn btn-warning btn-xs mx-1" @click="abrirModalComplemento(pedido)"
                 title="Adicionar pedido complementar">
                 <i class='bx bx-plus'></i>
               </button>
 
-              <button class="btn btn-secondary btn-xs mx-1" @click="abrirModalComplemento(pedido)"
+              <button class="btn btn-error btn-xs mx-1 text-white" @click="abrirModalComplemento(pedido)"
                 title="Remover pedido complementar">
                 <i class='bx bx-trash'></i>
               </button>
@@ -124,7 +125,7 @@ export default {
       codigoComplemento: "",
     };
   },
-  watch : {
+  watch: {
     'filtro.dataInicial'(value) {
       localStorage.setItem('dataInicial', value);
       this.totais(this.filtro.dataInicial, this.filtro.dataFinal, this.filtro.busca);
@@ -135,6 +136,16 @@ export default {
     }
   },
   methods: {
+    handleRowClick(event, rota) {
+      // Verifica se o clique foi dentro da célula de Ações
+      if (event.target.closest('td.no-active-click')) {
+        return; // Não navega
+      }
+      this.goTo(rota);
+    },
+    goTo(rota) {
+      this.$router.push(rota);
+    },
     async totais(dataInicial = null, dataFinal = null, busca = null) {
       try {
         this.loadData = true;
@@ -143,7 +154,7 @@ export default {
         };
 
         const response = await axios.get(
-          `http://localhost:8083/api/v1/pedidos`,
+          `/api/v1/pedidos`,
           {
             headers: authorization,
             params: { data_inicial: dataInicial, data_final: dataFinal, busca: busca }
@@ -239,7 +250,7 @@ export default {
         };
 
         const resp = await axios.post(
-          "http://localhost:8083/api/v1/pedidos/complementos",
+          "/api/v1/pedidos/complementos",
           payload,
           { headers: authorization }
         );
