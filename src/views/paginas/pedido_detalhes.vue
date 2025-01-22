@@ -4,27 +4,28 @@
     <div class="grid grid-cols-4 gap-4">
         <div class="col-span-4 md:col-span-3">
             <!-- Itens do Pedido -->
-            <div class="card bg-base-100 shadow p-6 mb-8">
-                <h2 class="text-2xl font-bold mb-2">Itens do Pedido</h2>
-                <p class="text-gray-500 mb-6">
+            <div class="overflow-x-auto card bg-base-100 w-full mb-3 shadow">
+                <h2 class="text-2xl font-bold mb-2 px-4 pt-4">Itens do Pedido</h2>
+                <p class="text-gray-500 mb-4 px-4">
                     Lista detalhada dos produtos incluídos no pedido, com seus valores e quantidades.
                 </p>
                 <div class="overflow-x-auto">
-                    <table class="table w-full whitespace-nowrap overflow-scroll">
-                        <thead>
+                    <table class="table whitespace-nowrap">
+                        <thead class="text-xs text-base-700 uppercase bg-base-200">
                             <tr>
                                 <th>#</th>
                                 <th>Produto</th>
-                                <th>Quantidade</th>
-                                <th>Preço de Tabela</th>
-                                <th>Desconto</th>
-                                <th>Preço Líquido</th>
+                                <th>QTD</th>
+                                <th>Bruto</th>
+                                <th>%</th>
+                                <th>Líquido</th>
                                 <th>Total</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item in pedido.itens" :key="item.id">
+                            <tr v-for="item in pedido.itens" :key="item.id"
+                                class="hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200">
                                 <td>{{ item.codigo }}</td>
                                 <td>{{ item.produto }}</td>
                                 <td>{{ item.quantidade }}</td>
@@ -33,8 +34,12 @@
                                 <td :class="item.preco_tabela / item.preco != 0 && item.desconto == '' ? 'bg-error text-white' : ''">{{ formatMoeda(item.preco_liquido) }}</td>
                                 <td>{{ formatMoeda(item.subtotal) }}</td>
                                 <td>
-                                    <button @click="editarItem(item)" class="btn btn-sm btn-primary">Editar</button>
-                                    <button @click="removerItem(item.id)" class="btn btn-sm btn-error">Excluir</button>
+                                    <button @click="editarItem(item)" class="btn btn-primary btn-xs mx-1">
+                                        <i class="bx bx-edit"></i>
+                                    </button>
+                                    <button @click="removerItem(item.id)" class="btn btn-error btn-xs mx-1 text-white">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -91,7 +96,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/axios';
 import moment from 'moment';
 import 'moment/locale/pt-br'; // Para suporte ao idioma português
 
@@ -131,7 +136,7 @@ export default {
         async carregarPedido() {
             const pedidoId = this.$route.params.id;
             try {
-                const response = await axios.get(`http://localhost:8083/api/v1/pedidos/${pedidoId}`);
+                const response = await axios.get(`/api/v1/pedidos/${pedidoId}`);
                 if (response.data.data.length > 0) {
                     this.pedido = response.data.data[0];
                 }
