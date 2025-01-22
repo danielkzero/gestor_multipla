@@ -18,4 +18,14 @@ export default defineConfig({
       '.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue',
     ],
   },
+  server: {
+    port: 8083, // Define a porta do servidor
+    proxy: {
+      '/api/v1': {
+        target: 'http://localhost:8083',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1/, '/api/v1'),
+      },
+    },
+  },
 })
