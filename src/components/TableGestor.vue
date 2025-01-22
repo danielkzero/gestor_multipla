@@ -1,20 +1,20 @@
 <template>
-    <table id="data_table" :class="modelValue ? 'hidden' : ''" class="table whitespace-nowrap w-full text-sm"
+    <table id="data_table" :class="modelValue ? 'hidden' : ''" class="table whitespace-nowrap w-full"
         style="font-size: 0.8rem">
         <thead>
             <tr class="text-left text-xs text-base-700 uppercase bg-base-200">
-                <th v-for="key in availableKeys" :key="key" class="px-2 py-1">
+                <th v-for="key in availableKeys" :key="key" >
                     {{ getCaption(key) }}
                 </th>
-                <th class="px-2 py-1">Ações</th>
+                <th >Ações</th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="(item, index) in items" :key="index" class="hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200">
-                <td v-for="key in availableKeys" :key="key" class="px-2 py-1">
+                <td v-for="key in availableKeys" :key="key" >
                     <!-- Imagem única -->
                     <template v-if="getFieldType(key) === 'imagens' && !Array.isArray(item[key])">
-                        <img :src="item[key] === null ? require('@/assets/empty-300x240.jpg') : item[key]" alt="Imagem"
+                        <img :src="item[key] === null ? 'src/assets/empty-300x240.jpg' : item[key]" alt="Imagem"
                             class="w-6 h-6 rounded border" />
                     </template>
 
@@ -72,7 +72,7 @@
                         <i class="bx bxs-edit"></i>
                     </router-link>
 
-                    <button class="btn btn-xs btn-error mx-1" @click="$emit('deleteItem', item)">
+                    <button class="btn btn-xs btn-error mx-1 text-white" @click="$emit('deleteItem', item)">
                         <i class="bx bxs-trash"></i>
                     </button>
                 </td>
