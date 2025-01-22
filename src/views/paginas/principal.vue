@@ -74,10 +74,11 @@
                 <i class='bx bx-plus'></i>
               </button>
 
-              <button class="btn btn-error btn-xs mx-1 text-white" @click="abrirModalComplemento(pedido)"
+              <button class="btn btn-error btn-xs mx-1 text-white" @click="abrirModalRemoverComplemento(pedido)"
                 title="Remover pedido complementar">
                 <i class='bx bx-trash'></i>
               </button>
+
             </td>
           </tr>
         </tbody>
@@ -100,6 +101,49 @@
     </div>
   </div>
 
+  <div v-if="mostrarModalRemover" class="modal modal-open">
+    <div class="modal-box w-11/12 max-w-5xl">
+      <h3 class="font-bold text-lg">Remover Complemento</h3>
+      <p class="py-4">
+        Complementos do pedido <strong>{{ pedidoSelecionado.numero_pedido }}</strong>:
+      </p>
+      <div v-if="complementos.length">
+        <table class="table whitespace-nowrap">
+          <thead class="text-xs text-base-700 uppercase bg-base-200">
+            <tr>
+              <th>Pedido</th>
+              <th>Cliente</th>
+              <th class="text-right">Valor Total</th>
+              <th class="text-center">Qtd.</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(pedido, index) in complementos" :key="index"
+              class="hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200">
+              <td>{{ pedido.numero_pedido }}</td>
+              <td>{{ pedido.cliente }}</td>
+              <td class="text-right">{{ formatMoeda(pedido.valor_total.toFixed(2)) }}</td>
+              <td class="text-center">{{ pedido.quantidade_itens }}</td>
+              <td class="text-center no-active-click">
+                <button class="btn btn-xs btn-error ml-2" @click="removerComplemento(pedido)">
+                  <i class="bx bx-trash"></i> Remover
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-else>
+        <p class="text-sm text-gray-500">Não há complementos para este pedido.</p>
+      </div>
+      <div class="modal-action">
+        <button class="btn btn-outline" @click="fecharModalRemoverComplemento">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+
 </template>
 
 <script>
@@ -121,6 +165,7 @@ export default {
       },
       loadData: false,
       mostrarModal: false,
+      mostrarModalRemover: false,
       pedidoSelecionado: null,
       codigoComplemento: "",
     };
@@ -255,7 +300,6 @@ export default {
           { headers: authorization }
         );
 
-        console.log("Complemento adicionado:", resp.data);
 
         Swal.fire({
           icon: "success",
@@ -275,6 +319,98 @@ export default {
           text: "Não foi possível adicionar o complemento. Tente novamente.",
           confirmButtonText: "Ok",
         });
+      }
+    },
+    abrirModalRemoverComplemento(pedido) {
+      this.pedidoSelecionado = pedido;
+      this.buscarComplementos(pedido.numero_pedido);
+    },
+    fecharModalRemoverComplemento() {
+      this.mostrarModalRemover = false;
+      this.pedidoSelecionado = null;
+      this.complementos = [];
+    },
+    async buscarComplementos(numeroPedido) {
+      try {
+        const authorization = {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        };
+
+        const response = await axios.get(`/api/v1/pedidos/complementos/${numeroPedido}`, {
+          headers: authorization,
+        });
+
+        this.complementos = response.data.data; // Assuma que a API retorna um array de complementos
+
+        this.pedidosFormatados = this.complementos.map((pedido) => {
+          const valorTotal = pedido.itens.reduce(
+            (total, item) => total + item.subtotal,
+            0
+          );
+          const quantidadeTotal = pedido.itens.reduce(
+            (total, item) => total + item.quantidade,
+            0
+          );
+          const pedidosDistintos = new Set(
+            pedido.itens.map((item) => item.pedido_id)
+          ).size;
+          const numeroCliente = pedido.cliente.match(/\((\d+)\)$/)?.[1] || "0";
+          const numeroClienteFormatado = numeroCliente.padStart(6, "0");
+
+          return {
+            id: pedido.id,
+            numero_pedido: pedido.numero_pedido,
+            cnpj: pedido.cnpj,
+            cliente: pedido.cliente,
+            cliente_numero: numeroClienteFormatado,
+            valor_total: valorTotal,
+            quantidade_itens: quantidadeTotal,
+            pedidos_distintos: pedidosDistintos,
+          };
+        });
+
+        this.complementos = this.pedidosFormatados;
+      } catch (error) {
+        console.error("Erro ao buscar complementos:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Erro",
+          text: "Não foi possível carregar os complementos. Tente novamente.",
+          confirmButtonText: "Ok",
+        });
+      } finally {
+        this.mostrarModalRemover = true;
+      }
+    },
+    async removerComplemento(complemento) {
+      try {
+        const authorization = {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        };
+
+        await axios.delete(`/api/v1/pedidos/complementos/${complemento.id}`, {
+          headers: authorization,
+        });
+
+        Swal.fire({
+          icon: "success",
+          title: "Sucesso",
+          text: "Complemento removido com sucesso!",
+          confirmButtonText: "Ok",
+        });
+
+        // Remova o complemento da lista local
+        this.complementos = this.complementos.filter((comp) => comp.id !== complemento.id);
+      } catch (error) {
+        console.error("Erro ao remover complemento:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Erro",
+          text: "Não foi possível remover o complemento. Tente novamente.",
+          confirmButtonText: "Ok",
+        });
+      } finally {
+        this.totais(this.filtro.dataInicial, this.filtro.dataFinal, this.filtro.busca);
       }
     },
     baixarTodos() {
