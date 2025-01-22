@@ -47,7 +47,7 @@
 
 
 <script>
-import axios from 'axios';
+import axios from '@/axios';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import SearchInput from './SearchInput.vue';
