@@ -1,7 +1,7 @@
 <template>
     
         <DataTableGestor 
-        :endPoint="'http://localhost:8083/api/v1/usuario'" 
+        :endPoint="'/api/v1/usuario'" 
         :novoItem="novoUsuario" 
         :availableKeys="availableKeys" 
         :limit="20"
