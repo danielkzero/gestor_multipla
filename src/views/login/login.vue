@@ -63,7 +63,6 @@ export default {
       tempo_espera: 180000, // Tempo de espera em milissegundos (3 minutos)
       bloqueadoAte: 0, // Armazena o momento em que o bloqueio termina
       lembrarMe: false,
-      apiGestor: 'http://localhost:8083/api/v1' // API do gestor
     }
   },
   methods: {
@@ -109,8 +108,7 @@ export default {
 
       localStorage.removeItem('token');
       try {
-        const response = await axios.post(
-          this.apiGestor + '/login',
+        const response = await axios.post('/api/v1/login',
           {
             usuario: this.usuario,
             senha: this.senha
@@ -125,8 +123,6 @@ export default {
         if (response.status >= 200 && response.status < 300) {
           const json = response.data;
           localStorage.setItem('token', json.token);
-
-          console.log(json);
 
           if (this.lembrarMe) {
             localStorage.setItem('usuario', this.usuario.toString());
