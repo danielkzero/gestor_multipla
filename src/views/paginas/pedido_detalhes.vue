@@ -30,11 +30,17 @@
                                 <td>{{ item.produto }}</td>
                                 <td>{{ item.quantidade }}</td>
                                 <td>{{ formatMoeda(item.preco_tabela) }}</td>
-                                <td>{{ formatPercent(item.desconto) }}</td>
-                                <td :class="item.preco_tabela / item.preco != 0 && item.desconto == '' ? 'bg-error text-white' : ''">{{ formatMoeda(item.preco_liquido) }}</td>
+                                <td :class="percentVerify(item)">{{ formatPercent(item.desconto) }}</td>
+                                <td :class="trendingUpDown(item)">
+                                    <i class='bx bx-trending-up'
+                                        v-if="trendingUpDown(item) == 'bg-primary text-white'"></i>
+                                    <i class='bx bx-trending-down'
+                                        v-if="trendingUpDown(item) == 'bg-error text-white'"></i>
+                                    {{ formatMoeda(item.preco_liquido) }}
+                                </td>
                                 <td>{{ formatMoeda(item.subtotal) }}</td>
                                 <td>
-                                    <button @click="editarItem(item)" class="btn btn-primary btn-xs mx-1">
+                                    <button @click="abrirModalEditar(item)" class="btn btn-primary btn-xs mx-1">
                                         <i class="bx bx-edit"></i>
                                     </button>
                                     <button @click="removerItem(item.id)" class="btn btn-error btn-xs mx-1 text-white">
@@ -43,6 +49,18 @@
                                 </td>
                             </tr>
                         </tbody>
+                        <!-- Rodapé -->
+                        <tfoot class="text-xs text-base-700 uppercase bg-base-200 border-base-300 border-t-2">
+                            <tr>
+                                <td colspan="2" class="font-bold text-right">Totais:</td>
+                                <td>{{ totalQuantidade }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ formatMoeda(totalSubtotal) }}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -52,7 +70,7 @@
             <div class="card bg-base-100 shadow p-6 mb-4">
                 <h2 class="text-2xl font-bold mb-2">Informações do Pedido</h2>
                 <p class="text-gray-500 mb-6">Resumo geral do pedido e seu status atual.</p>
-                
+
                 <p class="text-lg"><strong>Cliente:</strong> {{ pedido.cliente }}</p>
             </div>
 
@@ -93,6 +111,44 @@
         </div>
     </div>
 
+    <!-- Modal para edição -->
+    <div v-if="mostrarModalEditar" class="modal modal-open">
+        <div class="modal-box">
+            <h2 class="text-2xl font-bold mb-2">Editar produto</h2>
+            <p class="text-gray-500 mb-4">Edite os produtos incluídos no pedido, seus descontos, valores e quantidades.
+            </p>
+            <p class="mb-4">{{ produtoEditar.codigo }} - {{ produtoEditar.produto }}</p>
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text">Quantidade</span>
+                </div>
+                <input type="number" placeholder="Type here" class="input input-bordered w-full" v-model="quantidade" />
+            </label>
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text">Desconto</span>
+                    <span class="label-text-alt text-error">Não use o caracter %</span>
+                </div>
+                <input type="number" placeholder="Desconto sem %" class="input input-bordered w-full"
+                    v-model="desconto" />
+            </label>
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text">Preço líquido</span>
+                </div>
+                <input type="number" placeholder="Type here" class="input input-bordered w-full"
+                    v-model="preco_liquido" />
+            </label>
+            <div class="modal-action">
+                <h2 class="text-2xl font-bold mt-2 me-auto">
+                    {{ formatMoeda(preco_liquido * quantidade) }}
+                </h2>
+                <button class="btn" @click="confirmarAlteracao()">Confirmar</button>
+                <button class="btn btn-outline" @click="fecharModalEditar()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
 </template>
 
 <script>
@@ -100,6 +156,7 @@ import axios from '@/axios';
 import moment from 'moment';
 import 'moment/locale/pt-br'; // Para suporte ao idioma português
 import { formatMoeda, formatPercent } from "@/utils/format.js";
+import Swal from 'sweetalert2';
 
 export default {
     data() {
@@ -125,12 +182,50 @@ export default {
                 representada: '',
                 itens: [],
             },
+            mostrarModalEditar: false,
+            produtoEditar: [],
+            quantidade: null,
+            desconto: null,
+            preco_liquido: null,
         };
     },
     mounted() {
         this.carregarPedido();
     },
+    computed: {
+        totalQuantidade() {
+            return this.pedido.itens.reduce((total, item) => total + item.quantidade, 0);
+        },
+        totalBruto() {
+            return this.pedido.itens.reduce((total, item) => total + item.preco_tabela * item.quantidade, 0);
+        },
+        totalLiquido() {
+            return this.pedido.itens.reduce((total, item) => total + item.preco_liquido * item.quantidade, 0);
+        },
+        totalSubtotal() {
+            return this.pedido.itens.reduce((total, item) => total + parseFloat(item.subtotal), 0);
+        },
+    },
     methods: {
+        trendingUpDown(item) {
+            if ((item.preco_tabela / item.preco_liquido) < 1 && item.desconto == null) {
+                return 'bg-primary text-white';
+            }
+            if ((item.preco_tabela / item.preco_liquido) > 1 && item.desconto == null) {
+                return 'bg-error text-white';
+            }
+
+            return '';
+        },
+        percentVerify(item) {
+            if (item.desconto == null) {
+                return '';
+            }
+            if ((item.preco_tabela * (1 - item.desconto)).toFixed(2) != item.preco_liquido.toFixed(2)) {
+                return 'bg-error text-white';
+            }
+            return '';
+        },
         formatDataBR(data) {
             return moment(data).format("DD/MM/YYYY");
         },
@@ -140,16 +235,57 @@ export default {
                 const response = await axios.get(`/api/v1/pedidos/${pedidoId}`);
                 if (response.data.data.length > 0) {
                     this.pedido = response.data.data[0];
+                    this.pedido.itens.forEach((item) => {
+                        item.codigo = item.codigo.replace("CX", "");
+                        item.codigo = item.codigo.padStart(6, "0");
+                    });
                 }
             } catch (error) {
                 console.error('Erro ao carregar o pedido:', error);
             }
         },
-        editarItem(item) {
-            console.log('Editar item:', item);
+        abrirModalEditar(item) {
+            this.mostrarModalEditar = true;
+            this.produtoEditar = item;
+            this.quantidade = item.quantidade;
+            this.desconto = item.desconto;
+            this.preco_liquido = item.preco_liquido;
+        },
+        fecharModalEditar() {
+            this.mostrarModalEditar = false;
+            this.produtoEditar = [];
         },
         removerItem(itemId) {
-            console.log('Remover item ID:', itemId);
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter esta ação!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, remover!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    axios
+                        .delete(`/api/v1/pedidos/itens/${itemId}`)
+                        .then(() => {
+                            this.pedido.itens = this.pedido.itens.filter(item => item.id !== itemId);
+                            Swal.fire('Removido!', 'O item foi removido com sucesso.', 'success');
+                        })
+                        .catch(error => {
+                            console.error("Erro ao remover o item:", error);
+                            Swal.fire('Erro!', 'Ocorreu um erro ao tentar remover o item.', 'error');
+                        });
+                }
+            });
+        },
+        confirmarAlteracao() {
+            this.mostrarModalEditar = false;
+            this.produtoEditar.quantidade = this.quantidade;
+            this.produtoEditar.desconto = this.desconto;
+            this.produtoEditar.preco_liquido = this.preco_liquido;
+            this.produtoEditar.subtotal = (this.preco_liquido * this.quantidade).toFixed(2);
         },
         formatMoeda,
         formatPercent,
