@@ -15,12 +15,11 @@
                                         <i :class="child.icon"></i>{{ child.label }}
                                     </summary>
                                     <ul>
-                                        <li v-for="(grandChild, grandChildIndex) in child.children" :key="grandChildIndex">
-                                            <router-link
-                                                :to="grandChild.path"
+                                        <li v-for="(grandChild, grandChildIndex) in child.children"
+                                            :key="grandChildIndex">
+                                            <router-link :to="grandChild.path"
                                                 :class="{ 'active': isActiveRoute(grandChild.path) }"
-                                                :aria-current="isActiveRoute(grandChild.path) ? 'page' : null"
-                                            >
+                                                :aria-current="isActiveRoute(grandChild.path) ? 'page' : null">
                                                 {{ grandChild.label }}
                                             </router-link>
                                         </li>
@@ -28,11 +27,8 @@
                                 </details>
                             </template>
                             <template v-else>
-                                <router-link
-                                    :to="child.path"
-                                    :class="{ 'active': isActiveRoute(child.path) }"
-                                    :aria-current="isActiveRoute(child.path) ? 'page' : null"
-                                >
+                                <router-link :to="child.path" :class="{ 'active': isActiveRoute(child.path) }"
+                                    :aria-current="isActiveRoute(child.path) ? 'page' : null">
                                     {{ child.label }}
                                 </router-link>
                             </template>
@@ -41,15 +37,27 @@
                 </details>
             </template>
             <template v-else>
-                <router-link
-                    :to="item.path"
-                    :class="{ 'active': isActiveRoute(item.path) }"
-                    :aria-current="isActiveRoute(item.path) ? 'page' : null"
-                >
+                <router-link :to="item.path" :class="{ 'active': isActiveRoute(item.path) }"
+                    :aria-current="isActiveRoute(item.path) ? 'page' : null">
                     <i :class="item.icon"></i>{{ item.label }}
                 </router-link>
             </template>
         </li>
+        <a href="https://hydradigital.com.br" target="_blank" class="text-decoration-none mt-auto">
+            <li>
+
+                <div class="grid grid-cols-3">
+                    <div class="col-span-1">
+                        <img src="@/assets/logo-hydra.png" height="50" />
+                    </div>
+                    <div class="col-span-2 my-auto ms-2">
+                        <strong>Hydra Digital</strong><br />
+                        Daniel Ramos
+                    </div>
+                </div>
+
+            </li>
+        </a>
     </ul>
 </template>
 
@@ -58,8 +66,8 @@ import logoGestor from '../logo/index.vue';
 
 export default {
     components: { logoGestor },
-    props: { 
-        fillG: String, 
+    props: {
+        fillG: String,
         fillESTOR: String,
         themeChecked: Boolean,
     },
@@ -67,7 +75,7 @@ export default {
         return {
             menuItems: [
                 { label: "Início", path: "/principal", icon: "bx bx-home" },
-                { label: "Usuarios", path: "/usuarios", icon: "bx bx-user"},
+                { label: "Usuarios", path: "/usuarios", icon: "bx bx-user" },
             ]
         };
     },
