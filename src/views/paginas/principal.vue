@@ -151,6 +151,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import moment from "moment";
 import { saveAs } from "file-saver";
+import { formatMoeda } from "@/utils/format.js";
 
 export default {
   data() {
@@ -181,6 +182,7 @@ export default {
     }
   },
   methods: {
+    formatMoeda,
     handleRowClick(event, rota) {
       // Verifica se o clique foi dentro da célula de Ações
       if (event.target.closest('td.no-active-click')) {
@@ -213,12 +215,6 @@ export default {
       } finally {
         this.loadData = false;
       }
-    },
-    formatMoeda(valor) {
-      return new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      }).format(valor);
     },
     formatarPedidos() {
       this.pedidosFormatados = this.pedidos.map((pedido) => {

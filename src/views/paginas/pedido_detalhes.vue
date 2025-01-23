@@ -30,7 +30,7 @@
                                 <td>{{ item.produto }}</td>
                                 <td>{{ item.quantidade }}</td>
                                 <td>{{ formatMoeda(item.preco_tabela) }}</td>
-                                <td>{{ item.desconto }}</td>
+                                <td>{{ formatPercent(item.desconto) }}</td>
                                 <td :class="item.preco_tabela / item.preco != 0 && item.desconto == '' ? 'bg-error text-white' : ''">{{ formatMoeda(item.preco_liquido) }}</td>
                                 <td>{{ formatMoeda(item.subtotal) }}</td>
                                 <td>
@@ -99,6 +99,7 @@
 import axios from '@/axios';
 import moment from 'moment';
 import 'moment/locale/pt-br'; // Para suporte ao idioma português
+import { formatMoeda, formatPercent } from "@/utils/format.js";
 
 export default {
     data() {
@@ -150,12 +151,8 @@ export default {
         removerItem(itemId) {
             console.log('Remover item ID:', itemId);
         },
-        formatMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-            }).format(valor);
-        },
+        formatMoeda,
+        formatPercent,
     },
 };
 </script>
