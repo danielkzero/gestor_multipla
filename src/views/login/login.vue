@@ -133,7 +133,7 @@ export default {
             localStorage.removeItem('senha');
             localStorage.removeItem('lembrarMe');
           }
-
+          this.getInfoUsuario();
           this.tentativas = 0; // Reseta tentativas ao logar com sucesso
           this.$router.push({ name: 'Inicio' });
         } else {
@@ -153,6 +153,21 @@ export default {
           confirmButtonText: 'Ok'
         });
         this.addTentativas(); // Incrementa as tentativas em caso de erro
+      }
+    },
+    async getInfoUsuario() {
+      const usuario = localStorage.getItem('usuario');
+      const response = await axios.get(`/api/v1/profile`,
+        {
+          params: {
+            email: usuario,
+          },
+        });
+      if (response.status == 200) {
+        const profile = response.data[0];
+        localStorage.setItem('json_profile', JSON.stringify(profile));
+      } else {
+        localStorage.removeItem('json_profile');
       }
     },
     async trazerInfoLogin() {
