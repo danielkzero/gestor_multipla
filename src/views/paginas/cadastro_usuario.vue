@@ -163,7 +163,6 @@ export default {
                 const id = this.$route.params.id;
                 axios.put(`/api/v1/usuario/${id}`, this.formData)
                     .then(response => {
-                        console.log(response);
                         alert('Usuário atualizado com sucesso!');
                         this.$router.push('/usuarios');
                     })
@@ -174,7 +173,6 @@ export default {
                 // Cria um novo usuário
                 axios.post('/api/v1/usuario', this.formData)
                     .then(response => {
-                        console.log(response);
                         alert('Usuário cadastrado com sucesso!');
                         this.$router.push('/usuarios');
                     })

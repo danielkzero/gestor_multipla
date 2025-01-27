@@ -127,11 +127,11 @@ export default {
 				this.base_dados = response.data.data.map((item) => {
 					return { id: item.id, nome: item.nome, email: item.email, telefone: item.telefone, principal: 0 };
 				});
-				console.log(this.base_dados);
+				//console.log(this.base_dados);
 			});
 		}, 300),
 		adicionarAoSeletor(item) {
-			console.log(this.localTempItem, item);
+			//console.log(this.localTempItem, item);
 			this.localTempItem = [...this.localTempItem, item];
 			this.buscaItem = '';
 			this.base_dados = [];

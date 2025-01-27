@@ -71,8 +71,6 @@ export default {
                 if (!this.enviando) {
                     this.enviarLoteImagens();
                 }
-
-                console.log(this.imagens, this.enviando);
             });
         },
         async enviarLoteImagens() {

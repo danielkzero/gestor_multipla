@@ -124,7 +124,7 @@ export default {
                     produto_id: this.produtoOpen.id,
                     imagens: base64Images
                 });
-                console.log('Imagens enviadas com sucesso', response.data);
+                //console.log('Imagens enviadas com sucesso', response.data);
 
                 this.updateProductImages(this.produtoOpen.id);
             } catch (error) {
@@ -137,7 +137,7 @@ export default {
                 await axios.delete(`/api/v1/produto_imagem/${image.id}`);
                 // Atualiza a lista de imagens removendo a imagem deletada
                 this.updateProductImages(this.produtoOpen.id);
-                console.log('Imagem deletada com sucesso', this.produtoOpen.id);
+                //console.log('Imagem deletada com sucesso', this.produtoOpen.id);
             } catch (error) {
                 console.error('Erro ao deletar imagem', error);
                 Swal.fire({
