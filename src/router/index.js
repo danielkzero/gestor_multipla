@@ -11,6 +11,20 @@ export const authGuard = async (to, from, next) => {
   }
 };
 
+
+const permissionGuard = (nivel) => {
+  return (to, from, next) => {
+    const jsonProfile = JSON.parse(localStorage.getItem("json_profile"));
+    const tipoPermissao = jsonProfile?.tipo_permissao;
+
+    if (nivel.includes(tipoPermissao)) {
+      next();
+    } else {
+      next({ name: "Principal" }); // Redirecione para uma rota padrão caso não tenha permissão
+    }
+  };
+};
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -30,31 +44,31 @@ const router = createRouter({
           path: '/principal',
           name: 'Principal',
           component: () => import('../views/paginas/principal.vue'),
-          beforeEnter: authGuard,
+          beforeEnter:  [authGuard, permissionGuard(["administrador", "comum"])],
         },
         {
           path: '/pedido/:id',
           name: 'PedidoDetalhes',
           component: () => import('../views/paginas/pedido_detalhes.vue'),
-          beforeEnter: authGuard,
+          beforeEnter:  [authGuard, permissionGuard(["administrador", "comum"])],
         },
         {
           path: '/usuarios',
           name: 'Usuarios',
           component: () => import('../views/paginas/lista_usuarios.vue'),
-          beforeEnter: authGuard,
+          beforeEnter:  [authGuard, permissionGuard(["administrador"])],
         },
         {
           path: "/cadastro/usuarios",
           name: "CadastroUsuario",
           component: () => import("../views/paginas/cadastro_usuario.vue"),
-          beforeEnter: authGuard,
+          beforeEnter:  [authGuard, permissionGuard(["administrador"])],
         },
         {
           path: "/cadastro/usuarios/:id",
           name: "CadastroUsuarioId",
           component: () => import("../views/paginas/cadastro_usuario.vue"),
-          beforeEnter: authGuard,
+          beforeEnter:  [authGuard, permissionGuard(["administrador"])],
         },
       ],
     },
