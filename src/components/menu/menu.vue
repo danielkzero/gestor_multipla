@@ -1,7 +1,7 @@
 <template>
     <ul class="menu bg-base-100 min-h-full w-56" id="menu">
         <logoGestor :G="fillG" :ESTOR="fillESTOR" class="p-4" />
-        <li v-for="(item, index) in menuItems" :key="index">
+        <li v-for="(item, index) in filteredMenuItems" :key="index">
             <template v-if="item.children && item.children.length > 0">
                 <details>
                     <summary>
@@ -74,15 +74,30 @@ export default {
     data() {
         return {
             menuItems: [
-                { label: "Início", path: "/principal", icon: "bx bx-home" },
-                { label: "Usuarios", path: "/usuarios", icon: "bx bx-user" },
-            ]
+                { label: "Início", path: "/principal", icon: "bx bx-home", nivel: ["administrador", "comum"] },
+                { label: "Usuarios", path: "/usuarios", icon: "bx bx-user", nivel: ["administrador"] },
+            ],
+            tipo_permissao: "comum",
         };
     },
     methods: {
         isActiveRoute(route) {
             return this.$route.path.startsWith(route);
         },
+        hasPermission(item) {
+            return item.nivel.includes(this.tipo_permissao);
+        },
     },
+    computed: {
+        filteredMenuItems() {
+            return this.menuItems.filter(this.hasPermission);
+        },
+    },
+    mounted() {
+        const json_profile = JSON.parse(localStorage.getItem("json_profile"));
+        if (localStorage.getItem("json_profile")) {
+            this.tipo_permissao = json_profile.tipo_permissao;
+        }
+    }
 };
 </script>
