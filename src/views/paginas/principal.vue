@@ -69,6 +69,10 @@
             <td class="text-center">{{ pedido.quantidade_itens }}</td>
             <td class="text-center">{{ pedido.pedidos_distintos - 1 }}</td>
             <td class="text-center no-active-click">
+              <button class="btn btn-primary btn-xs mx-1" @click="baixarPedido(pedido)"
+                title="Visualizar">
+                <i class='bx bx-download'></i>
+              </button>
               <button class="btn btn-warning btn-xs mx-1" @click="abrirModalComplemento(pedido)"
                 title="Adicionar pedido complementar">
                 <i class='bx bx-plus'></i>
@@ -425,6 +429,27 @@ export default {
         saveAs(blob, fileName);
       });
     },
+    baixarPedido(item) {
+      
+      let pedidoFilter = this.pedidos.filter((pedido) => {
+        return pedido.numero_pedido === item.numero_pedido;
+      })
+
+
+      pedidoFilter = pedidoFilter[0];
+      
+      const fileName = `${pedidoFilter.numero_pedido} ${pedidoFilter.cliente}.txt`;
+      const fileContent = pedidoFilter.itens
+       .map((item) => {
+          const codigo = item.codigo.toString().padStart(6, "0");
+          const quantidade = item.quantidade.toString().padStart(8, "0");
+          const precoLiquido = item.preco_liquido.toFixed(2).replace(".", ",").padStart(7, "0");
+          return `${codigo} ${quantidade} ${precoLiquido}`;
+        })
+       .join("\n");
+       const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+       saveAs(blob, fileName);
+    }
 
   },
   mounted() {
