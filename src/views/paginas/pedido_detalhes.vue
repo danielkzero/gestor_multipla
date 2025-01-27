@@ -43,7 +43,7 @@
                                     <button @click="abrirModalEditar(item)" class="btn btn-primary btn-xs mx-1">
                                         <i class="bx bx-edit"></i>
                                     </button>
-                                    <button @click="removerItem(item.id)" class="btn btn-error btn-xs mx-1 text-white">
+                                    <button @click="removerItem(item.pedido_id, item.codigo)" class="btn btn-error btn-xs mx-1 text-white">
                                         <i class="bx bx-trash"></i>
                                     </button>
                                 </td>
@@ -143,7 +143,7 @@
                 <h2 class="text-2xl font-bold mt-2 me-auto">
                     {{ formatMoeda(preco_liquido * quantidade) }}
                 </h2>
-                <button class="btn" @click="confirmarAlteracao()">Confirmar</button>
+                <button class="btn" @click="confirmarAlteracao(produtoEditar.pedido_id, produtoEditar.codigo)">Confirmar</button>
                 <button class="btn btn-outline" @click="fecharModalEditar()">Cancelar</button>
             </div>
         </div>
@@ -248,14 +248,14 @@ export default {
             this.mostrarModalEditar = true;
             this.produtoEditar = item;
             this.quantidade = item.quantidade;
-            this.desconto = item.desconto;
+            this.desconto = item.desconto == null ? null : item.desconto * 100;
             this.preco_liquido = item.preco_liquido;
         },
         fecharModalEditar() {
             this.mostrarModalEditar = false;
             this.produtoEditar = [];
         },
-        removerItem(itemId) {
+        removerItem(pedido_id, codigo) {
             Swal.fire({
                 title: 'Tem certeza?',
                 text: "Você não poderá reverter esta ação!",
@@ -268,9 +268,9 @@ export default {
             }).then((result) => {
                 if (result.isConfirmed) {
                     axios
-                        .delete(`/api/v1/pedidos/itens/${itemId}`)
-                        .then(() => {
-                            this.pedido.itens = this.pedido.itens.filter(item => item.id !== itemId);
+                        .delete(`/api/v1/pedidos/itens/${pedido_id}/${codigo.replace(/^0+/, "")}`)
+                        .then((response) => {
+                            this.pedido.itens = this.pedido.itens.filter(item => item.codigo.replace(/^0+/, "") !== codigo.replace(/^0+/, ""));
                             Swal.fire('Removido!', 'O item foi removido com sucesso.', 'success');
                         })
                         .catch(error => {
@@ -280,12 +280,34 @@ export default {
                 }
             });
         },
-        confirmarAlteracao() {
+        confirmarAlteracao(pedido_id, codigo) {
             this.mostrarModalEditar = false;
             this.produtoEditar.quantidade = this.quantidade;
-            this.produtoEditar.desconto = this.desconto;
-            this.produtoEditar.preco_liquido = this.preco_liquido;
-            this.produtoEditar.subtotal = (this.preco_liquido * this.quantidade).toFixed(2);
+            this.produtoEditar.desconto = this.desconto == 0 ? null : this.desconto / 100;
+            this.produtoEditar.preco_liquido = this.preco_liquido * (1 - this.produtoEditar.desconto);
+            this.produtoEditar.subtotal = ((this.produtoEditar.preco_liquido * this.produtoEditar.quantidade) * (1 - this.produtoEditar.desconto)).toFixed(2);
+
+            // Enviar dados para API para atualizar item.
+            axios.put(`/api/v1/pedidos/itens/${pedido_id}/${codigo.replace(/^0+/, "")}`, this.produtoEditar)
+            .then((response) => {
+                Swal.fire({
+                    position: "top-end",
+                    title: 'O item foi alterado com sucesso.',
+                    icon:'success',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+            })
+            .catch((error) => {
+                console.error("Erro ao alterar o item:", error);
+                Swal.fire({
+                    position: "top-end",
+                    title: 'Ocorreu um erro ao tentar alterar o item.',
+                    icon: 'error',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+            });
         },
         formatMoeda,
         formatPercent,
