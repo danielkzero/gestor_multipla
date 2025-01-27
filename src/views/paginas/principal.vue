@@ -70,9 +70,10 @@
             <td class="text-center">{{ pedido.pedidos_distintos - 1 }}</td>
             <td class="text-center no-active-click">
               <button class="btn btn-primary btn-xs mx-1" @click="baixarPedido(pedido)"
-                title="Visualizar">
+                :title="'Baixar pedido ' + pedido.numero_pedido ">
                 <i class='bx bx-download'></i>
               </button>
+
               <button class="btn btn-warning btn-xs mx-1" @click="abrirModalComplemento(pedido)"
                 title="Adicionar pedido complementar">
                 <i class='bx bx-plus'></i>
@@ -82,7 +83,6 @@
                 title="Remover pedido complementar">
                 <i class='bx bx-trash'></i>
               </button>
-
             </td>
           </tr>
         </tbody>
