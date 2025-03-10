@@ -10,58 +10,73 @@
                     Lista detalhada dos produtos incluídos no pedido, com seus valores e quantidades.
                 </p>
                 <div class="overflow-x-auto">
-                    <table class="table whitespace-nowrap">
-                        <thead class="text-xs text-base-700 uppercase bg-base-200">
-                            <tr>
-                                <th>#</th>
-                                <th>Produto</th>
-                                <th>QTD</th>
-                                <th>Bruto</th>
-                                <th>%</th>
-                                <th>Líquido</th>
-                                <th>Total</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="item in pedido.itens" :key="item.id"
-                                class="hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200">
-                                <td>{{ item.codigo }}</td>
-                                <td>{{ item.produto }}</td>
-                                <td>{{ item.quantidade }}</td>
-                                <td>{{ formatMoeda(item.preco_tabela) }}</td>
-                                <td :class="percentVerify(item)">{{ formatPercent(item.desconto) }}</td>
-                                <td :class="trendingUpDown(item)">
+                    <DataTable :value="pedido.itens" responsiveLayout="scroll"
+                        tableClass="table whitespace-nowrap" :rowClass="rowClass">
+                        <!-- Cabeçalho -->
+                        <template #header>
+                            <div class="text-xs text-base-700 uppercase bg-base-200 p-2 rounded-t-lg">
+                                <span class="font-bold">Lista de Itens</span>
+                            </div>
+                        </template>
+
+                        <Column field="codigo" header="[#]" class="whitespace-nowrap"></Column>
+                        <Column field="produto" header="Produto" sortable></Column>
+                        <Column field="quantidade" header="QTD" sortable></Column>
+                        <Column field="preco_tabela" header="Bruto" sortable>
+                            <template #body="slotProps">
+                                {{ formatMoeda(slotProps.data.preco_tabela) }}
+                            </template>
+                        </Column>
+                        <Column field="desconto" header="%" sortable>
+                            <template #body="slotProps">
+                                <span :class="percentVerify(slotProps.data)">
+                                    {{ formatPercent(slotProps.data.desconto) }}
+                                </span>
+                            </template>
+                        </Column>
+                        <Column field="preco_liquido" header="Líquido" :pt="{
+                            bodyCell: (data) => ({
+                                class: trendingUpDown(data.parent.props.rowData),
+                            }),
+                        }" sortable>
+                            <template #body="slotProps">
+                                <span :class="trendingUpDown(slotProps.data)">
                                     <i class='bx bx-trending-up'
-                                        v-if="trendingUpDown(item) == 'bg-primary text-white'"></i>
+                                        v-if="trendingUpDown(slotProps.data) === 'bg-primary text-white'"></i>
                                     <i class='bx bx-trending-down'
-                                        v-if="trendingUpDown(item) == 'bg-error text-white'"></i>
-                                    {{ formatMoeda(item.preco_liquido) }}
-                                </td>
-                                <td>{{ formatMoeda(item.subtotal) }}</td>
-                                <td>
-                                    <button @click="abrirModalEditar(item)" class="btn btn-primary btn-xs mx-1">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <button @click="removerItem(item.pedido_id, item.codigo)" class="btn btn-error btn-xs mx-1 text-white">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
+                                        v-if="trendingUpDown(slotProps.data) === 'bg-error text-white'"></i>
+                                    {{ formatMoeda(slotProps.data.preco_liquido) }}
+                                </span>
+                            </template>
+                        </Column>
+                        <Column field="subtotal" header="Total" sortable>
+                            <template #body="slotProps">
+                                {{ formatMoeda(slotProps.data.subtotal) }}
+                            </template>
+                        </Column>
+
+                        <!-- Ações -->
+                        <Column header="Ações">
+                            <template #body="slotProps">
+                                <button @click="abrirModalEditar(slotProps.data)" class="btn btn-primary btn-xs mx-1">
+                                    <i class="bx bx-edit"></i>
+                                </button>
+                                <button @click="removerItem(slotProps.data.pedido_id, slotProps.data.codigo)"
+                                    class="btn btn-error btn-xs mx-1 dark:text-white ">
+                                    <i class="bx bx-trash"></i>
+                                </button>
+                            </template>
+                        </Column>
                         <!-- Rodapé -->
-                        <tfoot class="text-xs text-base-700 uppercase bg-base-200 border-base-300 border-t-2">
-                            <tr>
-                                <td colspan="2" class="font-bold text-right">Totais:</td>
-                                <td>{{ totalQuantidade }}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td>{{ formatMoeda(totalSubtotal) }}</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                        <ColumnGroup type="footer">
+                            <Row>
+                                <Column footer="Totais:" colspan="2"/>
+                                <Column :footer="totalQuantidade" colspan="4" />
+                                <Column :footer="formatMoeda(totalSubtotal)" colspan="1" />
+                            </Row>
+                        </ColumnGroup>
+                    </DataTable>
+
                 </div>
             </div>
         </div>
@@ -143,7 +158,8 @@
                 <h2 class="text-2xl font-bold mt-2 me-auto">
                     {{ formatMoeda(preco_liquido * quantidade) }}
                 </h2>
-                <button class="btn" @click="confirmarAlteracao(produtoEditar.pedido_id, produtoEditar.codigo)">Confirmar</button>
+                <button class="btn"
+                    @click="confirmarAlteracao(produtoEditar.pedido_id, produtoEditar.codigo)">Confirmar</button>
                 <button class="btn btn-outline" @click="fecharModalEditar()">Cancelar</button>
             </div>
         </div>
@@ -207,6 +223,9 @@ export default {
         },
     },
     methods: {
+        rowClass() {
+            return 'hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200';
+        },
         trendingUpDown(item) {
             if ((item.preco_tabela / item.preco_liquido) < 1 && item.desconto == null) {
                 return 'bg-primary text-white';
@@ -289,25 +308,25 @@ export default {
 
             // Enviar dados para API para atualizar item.
             axios.put(`/api/v1/pedidos/itens/${pedido_id}/${codigo.replace(/^0+/, "")}`, this.produtoEditar)
-            .then((response) => {
-                Swal.fire({
-                    position: "top-end",
-                    title: 'O item foi alterado com sucesso.',
-                    icon:'success',
-                    showConfirmButton: false,
-                    timer: 1000
+                .then((response) => {
+                    Swal.fire({
+                        position: "top-end",
+                        title: 'O item foi alterado com sucesso.',
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                })
+                .catch((error) => {
+                    console.error("Erro ao alterar o item:", error);
+                    Swal.fire({
+                        position: "top-end",
+                        title: 'Ocorreu um erro ao tentar alterar o item.',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
                 });
-            })
-            .catch((error) => {
-                console.error("Erro ao alterar o item:", error);
-                Swal.fire({
-                    position: "top-end",
-                    title: 'Ocorreu um erro ao tentar alterar o item.',
-                    icon: 'error',
-                    showConfirmButton: false,
-                    timer: 1000
-                });
-            });
         },
         formatMoeda,
         formatPercent,

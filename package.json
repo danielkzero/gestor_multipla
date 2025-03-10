@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node deploy.cjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,7 +24,9 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
     "autoprefixer": "^10.4.20",
+    "ftp-deploy": "^2.4.7",
     "postcss": "^8.5.1",
+    "postcss-import": "^16.1.0",
     "tailwindcss": "^3.4.17",
     "vite": "^6.0.5",
     "vite-plugin-vue-devtools": "^7.6.8"

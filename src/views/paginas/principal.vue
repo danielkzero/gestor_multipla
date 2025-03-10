@@ -5,16 +5,16 @@
         <i class="bx bx-download"></i>
         Baixar todos
       </button>
+
     </div>
     <!-- Tabela -->
     <div class="overflow-x-auto card bg-base-100 w-full mb-3 shadow">
+      <!--
       <table class="table whitespace-nowrap">
-        <!-- head -->
         <thead>
           <tr>
             <th colspan="9">
               <div class="flex justify-between items-center">
-                <!-- Filtros de Data -->
                 <div class="flex space-x-2">
                   <div>
                     <label class="block text-sm font-medium">Data Inicial</label>
@@ -27,7 +27,6 @@
                       class="input input-sm input-bordered w-full max-w-xs" />
                   </div>
                 </div>
-                <!-- Campo de Pesquisa por Texto -->
                 <div class="w-1/3">
                   <label class="block text-sm font-medium">Pesquisar</label>
                   <div class="flex">
@@ -57,9 +56,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(pedido, index) in pedidosFiltrados" :key="pedido.id"
-            class="hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200"
-            @click="handleRowClick($event, '/pedido/' + pedido.numero_pedido)">
+          <tr v-for="(pedido, index) in pedidosFiltrados" :key="pedido.id" class="cursor-pointer "
+            @click="handleRowClick($event, '/pedido/' + pedido.numero_pedido)"
+            :class="(hasPriceIssue(pedido) ? 'hover:bg-red-300 bg-red-200' : 'hover:bg-base-300 odd:bg-base-100 even:bg-base-200')">
             <th>{{ index + 1 }}</th>
             <td>{{ pedido.numero_pedido }}</td>
             <td>{{ pedido.cnpj }}</td>
@@ -70,7 +69,7 @@
             <td class="text-center">{{ pedido.pedidos_distintos - 1 }}</td>
             <td class="text-center no-active-click">
               <button class="btn btn-primary btn-xs mx-1" @click="baixarPedido(pedido)"
-                :title="'Baixar pedido ' + pedido.numero_pedido ">
+                :title="'Baixar pedido ' + pedido.numero_pedido">
                 <i class='bx bx-download'></i>
               </button>
 
@@ -86,18 +85,101 @@
             </td>
           </tr>
         </tbody>
-      </table>
+      </table>-->
+      <DataTable :value="pedidosFiltrados" responsiveLayout="scroll" :rowClass="rowClassPedido"
+        @row-click="handleRowClick" tableClass="table whitespace-nowrap">
+        <!-- Cabeçalho com Filtros -->
+        <template #header>
+          <div class="flex justify-between items-center p-3">
+            <!-- Filtros de Data -->
+            <div class="flex space-x-2">
+              <div>
+                <label class="block text-sm font-medium">Data Inicial</label>
+                <input type="date" v-model="filtro.dataInicial" class="input input-sm input-bordered w-full max-w-xs" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium">Data Final</label>
+                <input type="date" v-model="filtro.dataFinal" class="input input-sm input-bordered w-full max-w-xs" />
+              </div>
+            </div>
+            <!-- Campo de Pesquisa -->
+            <div class="w-1/3">
+              <label class="block text-sm font-medium">Pesquisar</label>
+              <div class="flex">
+                <input type="text" v-model="filtro.texto" placeholder="Digite aqui..."
+                  class="input input-sm input-bordered w-full" />
+                <button class="btn btn-sm btn-primary inline-flex justify-center items-center gap-x-2 ms-2"
+                  @click="totais(filtro.dataInicial, filtro.dataFinal, filtro.texto)">
+                  Filtrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Colunas -->
+        <Column header="[#]" style="width: 50px">
+          <template #body="slotProps">
+            {{ pedidosFiltrados.indexOf(slotProps.data) + 1 }}
+          </template>
+        </Column>
+        <Column field="numero_pedido" header="Pedido" sortable></Column>
+        <Column field="cnpj" header="CNPJ" sortable></Column>
+        <Column field="cliente_numero" header="Código" sortable></Column>
+        <Column field="cliente" header="Cliente" sortable></Column>
+        <Column field="valor_total" header="Valor Total" class="text-right" sortable>
+          <template #body="slotProps">
+            {{ formatMoeda(slotProps.data.valor_total.toFixed(2)) }}
+          </template>
+        </Column>
+        <Column field="quantidade_itens" header="Qtd." class="text-center" sortable></Column>
+        <Column field="pedidos_distintos" header="Complementos" class="text-center" sortable>
+          <template #body="slotProps">
+            {{ slotProps.data.pedidos_distintos - 1 }}
+          </template>
+        </Column>
+        <Column header="Ações" class="text-center">
+          <template #body="slotProps">
+            <button class="btn btn-primary btn-xs mx-1" @click.stop="baixarPedido(slotProps.data)"
+              :title="'Baixar pedido ' + slotProps.data.numero_pedido">
+              <i class="bx bx-download"></i>
+            </button>
+
+            <button class="btn btn-warning btn-xs mx-1" @click.stop="abrirModalComplemento(slotProps.data)"
+              title="Adicionar pedido complementar">
+              <i class="bx bx-plus"></i>
+            </button>
+
+            <button class="btn btn-error btn-xs mx-1 text-white"
+              @click.stop="abrirModalRemoverComplemento(slotProps.data)" title="Remover pedido complementar">
+              <i class="bx bx-trash"></i>
+            </button>
+          </template>
+        </Column>
+      </DataTable>
     </div>
   </div>
 
   <div v-if="mostrarModal" class="modal modal-open">
-    <div class="modal-box">
+    <div class="modal-box w-11/12 max-w-5xl">
       <h3 class="font-bold text-lg">Adicionar Complemento</h3>
       <p class="py-4">
         Código do pedido complementar para o pedido <strong>{{ pedidoSelecionado.numero_pedido }}</strong>:
       </p>
       <input type="text" class="input input-bordered w-full mb-4" v-model="codigoComplemento"
         placeholder="Digite o código do pedido complementar" />
+      <div v-if="complementos.length">
+        <DataTable :value="complementos" :rowClass="rowClass" tableClass="table whitespace-nowrap">
+          <Column field="numero_pedido" header="Pedido" sortable></Column>
+          <Column field="cliente" header="Cliente" sortable></Column>
+          <Column field="valor_total" header="Valor Total" sortable>
+            <template #body="slotProps">
+              {{ formatMoeda(slotProps.data.valor_total.toFixed(2)) }}
+            </template>
+          </Column>
+          <Column field="quantidade_itens" header="Qtd." sortable></Column>
+        </DataTable>
+      </div>
       <div class="modal-action">
         <button class="btn" @click="enviarComplemento">Confirmar</button>
         <button class="btn btn-outline" @click="fecharModalComplemento">Cancelar</button>
@@ -112,31 +194,23 @@
         Complementos do pedido <strong>{{ pedidoSelecionado.numero_pedido }}</strong>:
       </p>
       <div v-if="complementos.length">
-        <table class="table whitespace-nowrap">
-          <thead class="text-xs text-base-700 uppercase bg-base-200">
-            <tr>
-              <th>Pedido</th>
-              <th>Cliente</th>
-              <th class="text-right">Valor Total</th>
-              <th class="text-center">Qtd.</th>
-              <th class="text-center">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(pedido, index) in complementos" :key="index"
-              class="hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200">
-              <td>{{ pedido.numero_pedido }}</td>
-              <td>{{ pedido.cliente }}</td>
-              <td class="text-right">{{ formatMoeda(pedido.valor_total.toFixed(2)) }}</td>
-              <td class="text-center">{{ pedido.quantidade_itens }}</td>
-              <td class="text-center no-active-click">
-                <button class="btn btn-xs btn-error ml-2" @click="removerComplemento(pedido)">
-                  <i class="bx bx-trash"></i> Remover
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <DataTable :value="complementos" :rowClass="rowClass" tableClass="table whitespace-nowrap">
+          <Column field="numero_pedido" header="Pedido" sortable></Column>
+          <Column field="cliente" header="Cliente" sortable></Column>
+          <Column field="valor_total" header="Valor Total" class="text-right" sortable>
+            <template #body="slotProps">
+              {{ formatMoeda(slotProps.data.valor_total.toFixed(2)) }}
+            </template>
+          </Column>
+          <Column field="quantidade_itens" header="Qtd." class="text-center" sortable></Column>
+          <Column header="Ações" class="text-center">
+            <template #body="slotProps">
+              <button class="btn btn-xs btn-error ml-2" @click="removerComplemento(slotProps.data)">
+                <i class="bx bx-trash"></i> Remover
+              </button>
+            </template>
+          </Column>
+        </DataTable>
       </div>
       <div v-else>
         <p class="text-sm text-gray-500">Não há complementos para este pedido.</p>
@@ -147,7 +221,12 @@
     </div>
   </div>
 
-
+  <div class="mb-3">
+    <button class="btn btn-accent" @click="baixarArquivoZip()">
+      <i class="bx bxs-extension"></i>
+      Baixar extensão chrome
+    </button>
+  </div>
 </template>
 
 <script>
@@ -173,6 +252,7 @@ export default {
       mostrarModalRemover: false,
       pedidoSelecionado: null,
       codigoComplemento: "",
+      complementos: []
     };
   },
   watch: {
@@ -186,16 +266,41 @@ export default {
     }
   },
   methods: {
+    rowClassPedido(data, index) {
+      return (this.hasPriceIssue(data) ? 'hover:bg-red-300 bg-red-200' : 'hover:bg-base-300 odd:bg-base-100 even:bg-base-200');
+    },
+    rowClass() {
+      return 'hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200';
+    },
     formatMoeda,
-    handleRowClick(event, rota) {
-      // Verifica se o clique foi dentro da célula de Ações
-      if (event.target.closest('td.no-active-click')) {
-        return; // Não navega
-      }
+    baixarArquivoZip() {
+      const link = document.createElement('a');
+      link.href = './extension exportar para o gestor.zip';
+      link.download = 'exportar_para_o_gestor.zip';
+      link.click();
+    },
+    handleRowClick(event) {
+      const rota = '/pedido/' + event.data.numero_pedido;
       this.goTo(rota);
     },
     goTo(rota) {
       this.$router.push(rota);
+    },
+    hasPriceIssue(pedido) {
+
+      let pedidoFilter = this.pedidos.filter((item) => {
+        return item.numero_pedido === pedido.numero_pedido;
+      });
+
+      pedidoFilter = pedidoFilter[0];
+
+      // Verifica se algum item não está com o preço correto
+      const itemComProblema = pedidoFilter.itens.find((item) => {
+        return (item.preco_tabela / item.preco_liquido) > 1 && item.desconto == null;
+      });
+
+      if (itemComProblema) return true;
+      return false;
     },
     async totais(dataInicial = null, dataFinal = null, busca = null) {
       try {
@@ -211,7 +316,6 @@ export default {
             params: { data_inicial: dataInicial, data_final: dataFinal, busca: busca }
           }
         );
-
         this.pedidos = response.data.data;
         this.formatarPedidos();
       } catch (error) {
@@ -267,11 +371,13 @@ export default {
       this.pedidoSelecionado = pedido;
       this.codigoComplemento = "";
       this.mostrarModal = true;
+      this.buscarComplementos(pedido.numero_pedido);
     },
     fecharModalComplemento() {
       this.mostrarModal = false;
       this.pedidoSelecionado = null;
       this.codigoComplemento = "";
+      this.complementos = [];
     },
     async enviarComplemento() {
       if (!this.codigoComplemento) {
@@ -324,6 +430,7 @@ export default {
     abrirModalRemoverComplemento(pedido) {
       this.pedidoSelecionado = pedido;
       this.buscarComplementos(pedido.numero_pedido);
+      this.mostrarModalRemover = true;
     },
     fecharModalRemoverComplemento() {
       this.mostrarModalRemover = false;
@@ -378,8 +485,6 @@ export default {
           text: "Não foi possível carregar os complementos. Tente novamente.",
           confirmButtonText: "Ok",
         });
-      } finally {
-        this.mostrarModalRemover = true;
       }
     },
     async removerComplemento(complemento) {
@@ -418,7 +523,7 @@ export default {
         const fileName = `${pedido.numero_pedido} ${pedido.cliente}.txt`;
         const fileContent = pedido.itens
           .map((item) => {
-            const codigo = item.codigo.toString().padStart(6, "0");
+            const codigo = item.codigo.replace('CX', '').toString().padStart(6, "0");
             const quantidade = item.quantidade.toString().padStart(8, "0");
             const precoLiquido = item.preco_liquido.toFixed(2).replace(".", ",").padStart(7, "0");
             return `${codigo} ${quantidade} ${precoLiquido}`;
@@ -430,25 +535,50 @@ export default {
       });
     },
     baixarPedido(item) {
-      
       let pedidoFilter = this.pedidos.filter((pedido) => {
         return pedido.numero_pedido === item.numero_pedido;
-      })
-
+      });
 
       pedidoFilter = pedidoFilter[0];
-      
+
+      // Verifica se algum item não está com o preço correto
+      const itemComProblema = pedidoFilter.itens.find((item) => {
+        return (item.preco_tabela / item.preco_liquido) > 1 && item.desconto == null;
+      });
+
+      if (itemComProblema) {
+        // Se houver algum item com problema, exibe o SweetAlert para confirmar
+        Swal.fire({
+          icon: 'warning',
+          title: 'Atenção',
+          text: 'Um ou mais itens não estão com o preço correto. Deseja baixar o pedido mesmo assim?',
+          showCancelButton: true,
+          confirmButtonText: 'Baixar',
+          cancelButtonText: 'Cancelar',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Se o usuário confirmar, baixa o pedido
+            this.baixarArquivo(pedidoFilter);
+          }
+        });
+      } else {
+        // Se todos os itens estiverem corretos, baixa o pedido diretamente
+        this.baixarArquivo(pedidoFilter);
+      }
+    },
+
+    baixarArquivo(pedidoFilter) {
       const fileName = `${pedidoFilter.numero_pedido} ${pedidoFilter.cliente}.txt`;
       const fileContent = pedidoFilter.itens
-       .map((item) => {
-          const codigo = item.codigo.toString().padStart(6, "0");
+        .map((item) => {
+          const codigo = item.codigo.replace('CX', '').toString().padStart(6, "0");
           const quantidade = item.quantidade.toString().padStart(8, "0");
           const precoLiquido = item.preco_liquido.toFixed(2).replace(".", ",").padStart(7, "0");
           return `${codigo} ${quantidade} ${precoLiquido}`;
         })
-       .join("\n");
-       const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
-       saveAs(blob, fileName);
+        .join("\n");
+      const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+      saveAs(blob, fileName);
     }
 
   },

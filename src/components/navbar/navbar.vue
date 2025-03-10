@@ -3,7 +3,7 @@
         <div class="navbar">
             <label for="my-drawer" class="p-2 ps-0 lg:hidden drawer-button">
                 <i class="bx bx-menu text-2xl"></i>
-                
+
             </label>
         </div>
 
@@ -14,13 +14,31 @@
                 <i class='swap-on fill-current bx bx-moon text-xl'></i>
                 <i class='swap-off fill-current bx bx-sun text-xl'></i>
             </label>
+
+            <!-- Dropdown de temas -->
+            <div class="dropdown dropdown-end me-2">
+                <label tabindex="0" class="btn btn-ghost btn-circle">
+                    <i class="bx bx-palette text-xl"></i>
+                </label>
+                <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4">
+                    <li><a @click="setTheme('sunset')">Sunset</a></li>
+                    <li><a @click="setTheme('cupcake')">Cupcake</a></li>
+                    <li><a @click="setTheme('dark')">Dark</a></li>
+                    <li><a @click="setTheme('synthwave')">Synthwave</a></li>
+                    <li><a @click="setTheme('corporate')">Corporate</a></li>
+                    <li><a @click="setTheme('retro')">Retro</a></li>
+                </ul>
+            </div>
+
+
             <div class="dropdown dropdown-end">
 
                 <label tabindex="0" role="button" class="avatar p-1 btn btn-circle" v-if="avatar_usuario == null">
-                    <i class="fill-current bx bxs-user-circle text-4xl"></i>                    
+                    <i class="fill-current bx bxs-user-circle text-4xl"></i>
                 </label>
 
-                <img tabindex="0" role="button" :src="avatar_usuario" class="avatar p-1 btn btn-circle"  v-if="avatar_usuario != null" />
+                <img tabindex="0" role="button" :src="avatar_usuario" class="avatar p-1 btn btn-circle"
+                    v-if="avatar_usuario != null" />
 
                 <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4">
                     <li>
@@ -61,6 +79,17 @@ export default defineComponent({
             localStorage.setItem('themecontroller', isChecked.toString());
             this.change(isChecked.toString());
         },
+
+        // Nova função para setar tema baseado na seleção do dropdown
+        async setTheme(theme) {
+            localStorage.setItem('theme', theme);
+            document.body.classList.remove('theme-light', 'theme-sunset', 'theme-cupcake', 'theme-dark', 'theme-synthwave', 'theme-corporate', 'theme-retro');
+            document.body.classList.add(`theme-${theme}`);
+            this.change(theme);
+
+            (this.$refs.themecontroller).value = theme;
+        },
+
         async change(isChecked) {
             this.fillG = 'rgb(255,157,0)';
             this.fillESTOR = 'rgb(0,0,0)';
@@ -100,7 +129,7 @@ export default defineComponent({
             localStorage.removeItem('json_profile');
 
             // Redireciona para a página de login
-            router.push({ name: 'login'});
+            router.push({ name: 'login' });
         }
     },
     mounted() {

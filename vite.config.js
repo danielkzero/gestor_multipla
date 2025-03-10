@@ -22,7 +22,7 @@ export default defineConfig({
     port: 8083, // Define a porta do servidor
     proxy: {
       '/api/v1': {
-        target: 'http://localhost:8083',
+        target: 'https://multipla.hydradigital.com.br',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/v1/, '/api/v1'),
       },

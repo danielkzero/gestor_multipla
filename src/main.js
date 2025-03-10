@@ -20,7 +20,7 @@ import Card from 'primevue/card';
 import AutoComplete from 'primevue/autocomplete';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-
+import ColumnGroup from "primevue/columngroup";
 const app = createApp(App);
 
 app.component('DataTable', DataTable);
@@ -32,7 +32,10 @@ app.component('Card', Card);
 app.component('AutoComplete', AutoComplete);
 app.component('IconField', IconField);
 app.component('InputIcon', InputIcon);
-app.use(PrimeVue);
+app.component('ColumnGroup', ColumnGroup);
+app.use(PrimeVue, {
+    theme: 'none'
+});
 
 app.use(createPinia());
 app.use(router);

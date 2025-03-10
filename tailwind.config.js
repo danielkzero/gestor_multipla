@@ -2,7 +2,7 @@
 export default {
   content: ['./src/**/*.{vue,js,ts}'],
   daisyui: {
-    themes: [ "light", "sunset", "synthwave" ],
+    themes: [ "light", "sunset", "cupcake", "synthwave", "dark", "retro", "corporate" ],
   },
   plugins: [
     require('daisyui'),require('tailwindcss-primeui')
