@@ -1,5 +1,6 @@
 <template>
   <div>
+    
     <div class="overflow-x-auto card bg-base-100 w-full mb-3 shadow p-3">
       <button class="btn btn-primary btn-sm w-full md:w-96" @click="baixarTodos">
         <i class="bx bx-download"></i>
@@ -9,83 +10,7 @@
     </div>
     <!-- Tabela -->
     <div class="overflow-x-auto card bg-base-100 w-full mb-3 shadow">
-      <!--
-      <table class="table whitespace-nowrap">
-        <thead>
-          <tr>
-            <th colspan="9">
-              <div class="flex justify-between items-center">
-                <div class="flex space-x-2">
-                  <div>
-                    <label class="block text-sm font-medium">Data Inicial</label>
-                    <input type="date" v-model="filtro.dataInicial"
-                      class="input input-sm input-bordered w-full max-w-xs" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium">Data Final</label>
-                    <input type="date" v-model="filtro.dataFinal"
-                      class="input input-sm input-bordered w-full max-w-xs" />
-                  </div>
-                </div>
-                <div class="w-1/3">
-                  <label class="block text-sm font-medium">Pesquisar</label>
-                  <div class="flex">
-                    <input type="text" v-model="filtro.texto" placeholder="Digite aqui..."
-                      class="input input-sm input-bordered w-full" />
-                    <button class="btn btn-sm btn-primary inline-flex justify-center items-center gap-x-2 ms-2"
-                      @click="totais(filtro.dataInicial, filtro.dataFinal, filtro.texto)">
-                      Filtrar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <thead class="text-xs text-base-700 uppercase bg-base-200">
-          <tr>
-            <th>#</th>
-            <th>Pedido</th>
-            <th>CNPJ</th>
-            <th>Código</th>
-            <th>Cliente</th>
-            <th class="text-right">Valor Total</th>
-            <th class="text-center">Qtd.</th>
-            <th class="text-center">Complementos</th>
-            <th class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(pedido, index) in pedidosFiltrados" :key="pedido.id" class="cursor-pointer "
-            @click="handleRowClick($event, '/pedido/' + pedido.numero_pedido)"
-            :class="(hasPriceIssue(pedido) ? 'hover:bg-red-300 bg-red-200' : 'hover:bg-base-300 odd:bg-base-100 even:bg-base-200')">
-            <th>{{ index + 1 }}</th>
-            <td>{{ pedido.numero_pedido }}</td>
-            <td>{{ pedido.cnpj }}</td>
-            <td>{{ pedido.cliente_numero }}</td>
-            <td>{{ pedido.cliente }}</td>
-            <td class="text-right">{{ formatMoeda(pedido.valor_total.toFixed(2)) }}</td>
-            <td class="text-center">{{ pedido.quantidade_itens }}</td>
-            <td class="text-center">{{ pedido.pedidos_distintos - 1 }}</td>
-            <td class="text-center no-active-click">
-              <button class="btn btn-primary btn-xs mx-1" @click="baixarPedido(pedido)"
-                :title="'Baixar pedido ' + pedido.numero_pedido">
-                <i class='bx bx-download'></i>
-              </button>
-
-              <button class="btn btn-warning btn-xs mx-1" @click="abrirModalComplemento(pedido)"
-                title="Adicionar pedido complementar">
-                <i class='bx bx-plus'></i>
-              </button>
-
-              <button class="btn btn-error btn-xs mx-1 text-white" @click="abrirModalRemoverComplemento(pedido)"
-                title="Remover pedido complementar">
-                <i class='bx bx-trash'></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>-->
+ 
       <DataTable :value="pedidosFiltrados" responsiveLayout="scroll" :rowClass="rowClassPedido"
         @row-click="handleRowClick" tableClass="table whitespace-nowrap">
         <!-- Cabeçalho com Filtros -->
@@ -267,7 +192,7 @@ export default {
   },
   methods: {
     rowClassPedido(data, index) {
-      return (this.hasPriceIssue(data) ? 'hover:bg-red-300 bg-red-200' : 'hover:bg-base-300 odd:bg-base-100 even:bg-base-200');
+      return (this.hasPriceIssue(data) ? 'hover:bg-error hover:bg-opacity-50 bg-error bg-opacity-25' : 'hover:bg-base-300 odd:bg-base-100 even:bg-base-200');
     },
     rowClass() {
       return 'hover:bg-base-300 cursor-pointer odd:bg-base-100 even:bg-base-200';

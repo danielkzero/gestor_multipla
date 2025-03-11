@@ -42,9 +42,9 @@
                             <template #body="slotProps">
                                 <span :class="trendingUpDown(slotProps.data)">
                                     <i class='bx bx-trending-up'
-                                        v-if="trendingUpDown(slotProps.data) === 'bg-primary text-white'"></i>
+                                        v-if="trendingUpDown(slotProps.data) === 'bg-primary'"></i>
                                     <i class='bx bx-trending-down'
-                                        v-if="trendingUpDown(slotProps.data) === 'bg-error text-white'"></i>
+                                        v-if="trendingUpDown(slotProps.data) === 'bg-error'"></i>
                                     {{ formatMoeda(slotProps.data.preco_liquido) }}
                                 </span>
                             </template>

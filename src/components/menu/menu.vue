@@ -1,7 +1,7 @@
 <template>
     <ul class="menu bg-base-100 min-h-full w-56" id="menu">
         <logoGestor :G="fillG" :ESTOR="fillESTOR" class="p-4" />
-        <li v-for="(item, index) in filteredMenuItems" :key="index">
+        <li v-for="(item, index) in filteredMenuItems" :key="index" class="menu045">
             <template v-if="item.children && item.children.length > 0">
                 <details>
                     <summary>
